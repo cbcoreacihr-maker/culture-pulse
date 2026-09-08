@@ -70,35 +70,38 @@
   }
 
   main{ flex:1 1 auto; min-width:0; }
-  .view{ padding: 40px 28px 120px; max-width: 900px; margin: 0 auto; }
-  @media (max-width:760px){ .view{ padding: 24px 16px 120px; } }
+  .view{ padding: 44px 32px 130px; max-width: 960px; margin: 0 auto; font-size:15px; }
+  @media (max-width:760px){ .view{ padding: 26px 18px 130px; } }
 
   /* ---- Survey form ---- */
-  .intro{ margin-bottom:28px; }
-  .eyebrow{ font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:10px; }
-  .intro h1{ font-size:30px; margin:0 0 10px; }
-  .intro p{ color:var(--ink-2); font-size:14.5px; line-height:1.6; max-width:62ch; margin:0 0 8px;}
+  .intro{ margin-bottom:30px; }
+  .eyebrow{ font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:12px; }
+  .intro h1{ font-size:33px; line-height:1.2; margin:0 0 14px; }
+  .intro-list{ color:var(--ink-2); font-size:15.5px; line-height:1.7; max-width:66ch; margin:0 0 12px; padding-left:22px; }
+  .intro-list li{ margin-bottom:4px; }
+  .intro p{ color:var(--ink-2); font-size:15.5px; line-height:1.7; max-width:66ch; margin:0 0 8px;}
   .confid{ display:inline-flex; gap:8px; align-items:flex-start; background:var(--accent-soft); color:var(--accent-strong);
-    border-radius:10px; padding:10px 14px; font-size:13px; line-height:1.5; margin-top:6px;}
+    border-radius:10px; padding:11px 15px; font-size:14px; line-height:1.55; margin-top:8px;}
 
   .closed-banner{ background:var(--accent-2-soft); color:var(--accent-2-strong); border-radius:12px; padding:20px 22px; font-size:14.5px; line-height:1.6; }
 
   .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); }
-  .section{ padding:24px; margin-bottom:20px; }
-  .section-head{ margin-bottom:18px; }
-  .section-tag{ font-size:11px; letter-spacing:.07em; text-transform:uppercase; font-weight:700; color:var(--muted); margin-bottom:6px; }
-  .section h2{ font-size:19px; margin:0 0 6px; }
-  .section .sub{ color:var(--ink-2); font-size:13.5px; }
+  .section{ padding:26px; margin-bottom:22px; }
+  .section-head{ margin-bottom:20px; }
+  .section-tag{ font-size:11.5px; letter-spacing:.07em; text-transform:uppercase; font-weight:700; color:var(--muted); margin-bottom:7px; }
+  .section h2{ font-size:20.5px; margin:0 0 7px; }
+  .section .sub{ color:var(--ink-2); font-size:14.5px; line-height:1.5; }
 
   .field-row{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
   @media (max-width:560px){ .field-row{ grid-template-columns:1fr; } }
-  .field label{ display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--ink-2); }
-  .field input[type=text], .field textarea{
+  .field label{ display:block; font-size:13.5px; font-weight:600; margin-bottom:7px; color:var(--ink-2); }
+  .field input[type=text], .field select, .field textarea{
     width:100%; border:1px solid var(--line); background:var(--bg); color:var(--ink); border-radius:9px;
-    padding:10px 12px; font-size:14px; font-family:inherit;
+    padding:11px 12px; font-size:14.5px; font-family:inherit;
   }
-  .field textarea{ resize:vertical; min-height:76px; line-height:1.5; }
-  .field input:focus, .field textarea:focus{ background:var(--surface); }
+  .field select{ cursor:pointer; }
+  .field textarea{ resize:vertical; min-height:80px; line-height:1.55; }
+  .field input:focus, .field select:focus, .field textarea:focus{ background:var(--surface); }
   .optional-tag{ font-weight:400; color:var(--muted); text-transform:none; letter-spacing:0; }
 
   .scale-legend{ display:grid; grid-template-columns: 1fr repeat(5, 54px); gap:8px; padding:0 4px 10px; font-size:10.5px; color:var(--muted); }
@@ -113,8 +116,8 @@
   @media (max-width:620px){
     .likert-row{ grid-template-columns: 1fr; gap:10px; padding:14px 4px; }
   }
-  .likert-row .qnum{ color:var(--muted); font-size:12px; margin-right:6px; }
-  .likert-row .qtext{ font-size:14px; line-height:1.45; }
+  .likert-row .qnum{ color:var(--muted); font-size:12.5px; margin-right:6px; }
+  .likert-row .qtext{ font-size:14.5px; line-height:1.5; }
   .likert-row.missing{ background: color-mix(in srgb, var(--critical) 8%, transparent); border-radius:8px; }
   .radio-group{ display:contents; }
   @media (max-width:620px){ .radio-group{ display:flex; gap:8px; flex-wrap:wrap; } }
@@ -142,9 +145,9 @@
   .other-row{ grid-column:1 / -1; }
   .other-row input[type=text]{ margin-top:8px; }
 
-  .open-q{ margin-bottom:22px; }
+  .open-q{ margin-bottom:24px; }
   .open-q:last-child{ margin-bottom:0; }
-  .open-q label{ display:block; font-size:14px; font-weight:600; margin-bottom:8px; }
+  .open-q label{ display:block; font-size:14.5px; font-weight:600; margin-bottom:9px; }
   .open-q .qmeta{ font-size:12px; color:var(--muted); font-weight:400; margin-left:6px; }
 
   .required-star{ color:var(--accent-2); }
@@ -305,9 +308,11 @@
     "Workplace politics / favoritism", "Frequent changes in priorities"
   ];
   var OTHER_LABEL = "Other";
+  var BUSINESS_FUNCTIONS = ["ACI Semiconductor","Advanced AI Lab","Consumer Digital Business","Strategy, Planning & Insights department","Adommo Medhabi Program"];
+  var JOB_GRADES = ["OM 01","OM 02","OM 03","OM 04","OM 05","OM 06","OM 07","OM 08","OM 09","OM 10"];
 
   var OPEN_QUESTIONS = [
-    { key:"biggestObstacle", label:"What is the single biggest obstacle preventing you from doing your best work?", required:true },
+    { key:"biggestObstacle", label:"What is the single biggest obstacle preventing you from doing your best work?", required:false },
     { key:"managerAction", label:"What one thing should your immediate manager do differently to help you perform better?", required:false },
     { key:"processToSimplify", label:"What process, policy, approval, or activity should be simplified or removed to improve productivity?", required:false },
     { key:"toolsNeeded", label:"What tools/technologies would significantly improve your performance?", required:false }
@@ -429,10 +434,11 @@
     var errorBanner = "";
     if (showErrors){
       var missing = [];
+      if (!form.businessFunction) missing.push("Business / Function");
+      if (!form.gradeLevel) missing.push("Job Grade");
       if (ratingsCompleteCount() < STATEMENTS.length) missing.push((STATEMENTS.length - ratingsCompleteCount()) + " statement(s) in Section A");
       if (form.barriers.length === 0) missing.push("at least 1 barrier in Question 26");
       if (form.barriers.indexOf(OTHER_LABEL) !== -1 && !form.otherBarrierText.trim()) missing.push("a description for “Other”");
-      if (!form.biggestObstacle.trim()) missing.push("Question 27 (biggest obstacle)");
       if (missing.length){
         errorBanner = '<div class="form-error">Please complete: ' + esc(missing.join(", ")) + '.</div>';
       }
@@ -442,7 +448,11 @@
     html += '<div class="intro">' +
       '<div class="eyebrow">Employee Survey</div>' +
       '<h1 class="display">High-Performance Culture Baseline &amp; Performance Barriers Survey</h1>' +
-      '<p>This survey has two objectives: (1) assess the current condition of our high-performance culture, and (2) identify what is preventing employees from doing their best work. Please answer based on your actual experience &mdash; results are analyzed in aggregate to set improvement priorities.</p>' +
+      '<ul class="intro-list">' +
+        '<li>This survey has two objectives: assess the current condition of our high-performance culture, and identify what is preventing employees from doing their best work.</li>' +
+        '<li>Please answer based on your actual experience.</li>' +
+        '<li>Results are analyzed in aggregate to set improvement priorities.</li>' +
+      '</ul>' +
       '<div class="confid">🔒 Individual responses remain strictly confidential. Only aggregated results are reviewed by HR.</div>' +
     '</div>';
 
@@ -450,11 +460,17 @@
 
     // Respondent profile
     html += '<div class="card section">' +
-      '<div class="section-head"><div class="section-tag">Respondent profile <span class="optional-tag">&middot; optional</span></div>' +
+      '<div class="section-head"><div class="section-tag">Respondent profile</div>' +
       '<h2>About you</h2><div class="sub">Used only to group results — never to identify you.</div></div>' +
       '<div class="field-row">' +
-        '<div class="field"><label for="f-bf">Business / Function</label><input type="text" id="f-bf" placeholder="e.g. Sales, Finance, Operations" value="'+esc(form.businessFunction)+'"></div>' +
-        '<div class="field"><label for="f-grade">Grade / Level</label><input type="text" id="f-grade" placeholder="e.g. Manager, Executive, Officer" value="'+esc(form.gradeLevel)+'"></div>' +
+        '<div class="field"><label for="f-bf">Business / Function <span class="required-star">*</span></label><select id="f-bf" data-required="1">' +
+          '<option value="" disabled'+(form.businessFunction?'':' selected')+'>Select…</option>' +
+          BUSINESS_FUNCTIONS.map(function(o){ return '<option value="'+esc(o)+'"'+(form.businessFunction===o?' selected':'')+'>'+esc(o)+'</option>'; }).join('') +
+        '</select></div>' +
+        '<div class="field"><label for="f-grade">Job Grade <span class="required-star">*</span></label><select id="f-grade" data-required="1">' +
+          '<option value="" disabled'+(form.gradeLevel?'':' selected')+'>Select…</option>' +
+          JOB_GRADES.map(function(o){ return '<option value="'+esc(o)+'"'+(form.gradeLevel===o?' selected':'')+'>'+esc(o)+'</option>'; }).join('') +
+        '</select></div>' +
       '</div>' +
     '</div>';
 
@@ -462,7 +478,7 @@
     html += '<div class="card section">' +
       '<div class="section-head"><div class="section-tag">Section A</div>' +
       '<h2>High-performance culture baseline</h2>' +
-      '<div class="sub">Rate each statement based on your current experience in the organization. <span class="required-star">*</span> all 25 required</div></div>' +
+      '<div class="sub">Rate each statement based on your current experience in the organization.</div></div>' +
       '<div class="scale-legend"><span></span>' + SCALE.map(function(s,i){ return '<span>'+(i+1)+'<br>'+s+'</span>'; }).join('') + '</div>' +
       '<div class="likert">' +
       STATEMENTS.map(function(text, idx){
@@ -504,7 +520,7 @@
       '</div>' +
       OPEN_QUESTIONS.map(function(oq, i){
         var n = 27 + i;
-        return '<div class="open-q"><label>'+n+'. '+esc(oq.label)+(oq.required? ' <span class="required-star">*</span>' : ' <span class="qmeta">optional</span>')+'</label>' +
+        return '<div class="open-q"><label>'+n+'. '+esc(oq.label)+'</label>' +
           '<textarea data-open="'+oq.key+'" placeholder="Type your answer…">'+esc(form[oq.key])+'</textarea></div>';
       }).join('') +
     '</div>';
@@ -522,8 +538,8 @@
   }
 
   function bindSurveyEvents(mount){
-    var bf = el("f-bf"); if (bf) bf.addEventListener("input", function(){ form.businessFunction = bf.value; });
-    var gr = el("f-grade"); if (gr) gr.addEventListener("input", function(){ form.gradeLevel = gr.value; });
+    var bf = el("f-bf"); if (bf) bf.addEventListener("change", function(){ form.businessFunction = bf.value; renderSurvey(); });
+    var gr = el("f-grade"); if (gr) gr.addEventListener("change", function(){ form.gradeLevel = gr.value; renderSurvey(); });
 
     qa('input[type=radio]', mount).forEach(function(r){
       r.addEventListener("change", function(){
@@ -558,10 +574,11 @@
   }
 
   function validate(){
+    if (!form.businessFunction) return false;
+    if (!form.gradeLevel) return false;
     if (ratingsCompleteCount() < STATEMENTS.length) return false;
     if (form.barriers.length === 0) return false;
     if (form.barriers.indexOf(OTHER_LABEL) !== -1 && !form.otherBarrierText.trim()) return false;
-    if (!form.biggestObstacle.trim()) return false;
     return true;
   }
 
