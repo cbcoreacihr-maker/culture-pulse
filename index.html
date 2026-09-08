@@ -101,13 +101,13 @@
   .field input:focus, .field textarea:focus{ background:var(--surface); }
   .optional-tag{ font-weight:400; color:var(--muted); text-transform:none; letter-spacing:0; }
 
-  .scale-legend{ display:grid; grid-template-columns: 1fr repeat(5, 46px); gap:8px; padding:0 4px 10px; font-size:10.5px; color:var(--muted); }
-  .scale-legend span{ text-align:center; line-height:1.25; }
+  .scale-legend{ display:grid; grid-template-columns: 1fr repeat(5, 54px); gap:8px; padding:0 4px 10px; font-size:10.5px; color:var(--muted); }
+  .scale-legend span{ text-align:center; line-height:1.25; min-width:0; overflow-wrap:break-word; hyphens:auto; }
   .scale-legend span:first-child{ text-align:left; }
   @media (max-width:620px){ .scale-legend{ display:none; } }
 
   .likert{ display:flex; flex-direction:column; }
-  .likert-row{ display:grid; grid-template-columns: 1fr repeat(5, 46px); align-items:center; gap:8px;
+  .likert-row{ display:grid; grid-template-columns: 1fr repeat(5, 54px); align-items:center; gap:8px;
     padding:12px 4px; border-top:1px solid var(--line); }
   .likert-row:first-child{ border-top:none; }
   @media (max-width:620px){
