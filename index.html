@@ -879,6 +879,7 @@
       '<select id="filter-fn"><option value="ALL">All Business/Function</option>' + fnOpts.map(function(v){ return '<option value="'+esc(v)+'" '+(filters.fn===v?'selected':'')+'>'+esc(v)+'</option>'; }).join('') + '</select>' +
       '<select id="filter-grade"><option value="ALL">All Grade/Level</option>' + gradeOpts.map(function(v){ return '<option value="'+esc(v)+'" '+(filters.grade===v?'selected':'')+'>'+esc(v)+'</option>'; }).join('') + '</select>' +
       '<button class="btn btn-ghost export-btn" id="btn-export" '+(total===0?'disabled':'')+'>Export CSV</button>' +
+      '<button class="btn btn-ghost" id="btn-print-summary" '+(total===0?'disabled':'')+'>Print Summary</button>' +
     '</div>';
 
     if (!responsesLoaded){
@@ -1054,6 +1055,8 @@
     });
     var exportBtn = el("btn-export");
     if (exportBtn) exportBtn.addEventListener("click", exportCsv);
+    var printBtn = el("btn-print-summary");
+    if (printBtn) printBtn.addEventListener("click", printSummary);
     var saveHc = el("btn-save-headcount");
     if (saveHc) saveHc.addEventListener("click", function(){
       var inp = el("f-headcount");
@@ -1130,6 +1133,57 @@
     if (!passcodeDraft){ return; }
     fetchResults(passcodeDraft);
     passcodeDraft = "";
+  }
+
+  function printSummary(){
+    var rows = filteredResponses();
+    var total = rows.length;
+    var qMeans = STATEMENTS.map(function(text, idx){
+      var n = idx+1, sum=0, count=0;
+      rows.forEach(function(r){ var v = r.ratings && r.ratings[n]; if (v){ sum+=v; count++; } });
+      return { n:n, text:text, mean: count? sum/count : 0, count: count };
+    });
+    var answered = qMeans.filter(function(m){ return m.count>0; });
+    var overallAvg = answered.length ? (answered.reduce(function(a,m){return a+m.mean;},0)/answered.length) : 0;
+    var sortedAsc = answered.slice().sort(function(a,b){ return a.mean-b.mean; });
+    var weakest = sortedAsc.slice(0,3);
+    var barrierCount = {};
+    BARRIERS.concat([OTHER_LABEL]).forEach(function(b){ barrierCount[b]=0; });
+    rows.forEach(function(r){ (r.barriers||[]).forEach(function(b){ barrierCount[b] = (barrierCount[b]||0)+1; }); });
+    var barrierSorted = Object.keys(barrierCount).map(function(b){ return {label:b, count:barrierCount[b]}; })
+      .filter(function(x){return x.count>0;}).sort(function(a,b){ return b.count-a.count; });
+    var topBarriers = barrierSorted.slice(0,3);
+    var hc = getHeadcount();
+    var participation = hc ? Math.round((total/hc)*100) : null;
+    var d = new Date();
+    var bodyHtml = '<h1 style="font-family:inherit;margin:0 0 4px">Culture Pulse — Results Summary</h1>' +
+      '<div style="font-size:12px;color:#555;margin-bottom:16px">Generated '+esc(d.toLocaleString())+' · '+total+' responses'+(participation!=null?' · Participation: '+participation+'%':'')+'</div>' +
+      '<div style="font-size:13px;font-weight:bold;margin:14px 0 4px">Overall average score</div>' +
+      '<div style="font-size:24px;font-weight:bold;margin-bottom:14px">'+overallAvg.toFixed(2)+' / 5</div>' +
+      '<div style="font-size:13px;font-weight:bold;margin:14px 0 4px">Weakest statements</div>' +
+      '<table style="width:100%;border-collapse:collapse;margin-bottom:14px">' +
+        '<tr><th style="border:1px solid #999;padding:4px 8px;text-align:left;font-size:11px">#</th><th style="border:1px solid #999;padding:4px 8px;text-align:left;font-size:11px">Statement</th><th style="border:1px solid #999;padding:4px 8px;text-align:left;font-size:11px">Avg</th></tr>' +
+        weakest.map(function(m){ return '<tr><td style="border:1px solid #999;padding:4px 8px;font-size:11px">Q'+m.n+'</td><td style="border:1px solid #999;padding:4px 8px;font-size:11px">'+esc(m.text)+'</td><td style="border:1px solid #999;padding:4px 8px;font-size:11px">'+m.mean.toFixed(2)+'</td></tr>'; }).join('') +
+      '</table>' +
+      '<div style="font-size:13px;font-weight:bold;margin:14px 0 4px">Top barriers</div>' +
+      '<table style="width:100%;border-collapse:collapse">' +
+        '<tr><th style="border:1px solid #999;padding:4px 8px;text-align:left;font-size:11px">Barrier</th><th style="border:1px solid #999;padding:4px 8px;text-align:left;font-size:11px">Responses</th></tr>' +
+        topBarriers.map(function(b){ return '<tr><td style="border:1px solid #999;padding:4px 8px;font-size:11px">'+esc(b.label)+'</td><td style="border:1px solid #999;padding:4px 8px;font-size:11px">'+b.count+'</td></tr>'; }).join('') +
+      '</table>';
+    var style = document.createElement('style');
+    style.id = 'printSummaryStyle';
+    style.textContent = '@media print{ body > *:not(#printSummaryWrap){display:none !important;} #printSummaryWrap{display:block !important;position:fixed;top:0;left:0;width:100%;background:#fff;color:#111;padding:24px;font-family:Arial,sans-serif;} }';
+    var wrap = document.createElement('div');
+    wrap.id = 'printSummaryWrap';
+    wrap.style.display = 'none';
+    wrap.innerHTML = bodyHtml;
+    document.body.appendChild(style);
+    document.body.appendChild(wrap);
+    window.print();
+    setTimeout(function(){
+      if (style.parentNode) style.parentNode.removeChild(style);
+      if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+    }, 800);
   }
 
   function csvEscape(v){
