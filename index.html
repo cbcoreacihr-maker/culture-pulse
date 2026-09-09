@@ -312,10 +312,10 @@
   var JOB_GRADES = ["OM 01","OM 02","OM 03","OM 04","OM 05","OM 06","OM 07","OM 08","OM 09","OM 10","PG 01","PG 02","PG 03","PG 04"];
 
   var OPEN_QUESTIONS = [
-    { key:"biggestObstacle", label:"What is the single biggest obstacle preventing you from doing your best work?", required:false },
-    { key:"managerAction", label:"What one thing should your immediate manager do differently to help you perform better?", required:false },
-    { key:"processToSimplify", label:"What process, policy, approval, or activity should be simplified or removed to improve productivity?", required:false },
-    { key:"toolsNeeded", label:"What tools/technologies would significantly improve your performance?", required:false }
+    { key:"biggestObstacle", label:"What is the single biggest obstacle preventing you from doing your best work?", required:true },
+    { key:"managerAction", label:"What one thing should your immediate manager do differently to help you perform better?", required:true },
+    { key:"processToSimplify", label:"What process, policy, approval, or activity should be simplified or removed to improve productivity?", required:true },
+    { key:"toolsNeeded", label:"What tools/technologies would significantly improve your performance?", required:true }
   ];
 
   var SCALE = ["Strongly Disagree","Disagree","Neutral","Agree","Strongly Agree"];
@@ -468,7 +468,7 @@
       if (!form.gradeLevel) missing.push("Job Grade");
       if (ratingsCompleteCount() < STATEMENTS.length) missing.push((STATEMENTS.length - ratingsCompleteCount()) + " statement(s) in Section A");
       if (form.barriers.length === 0) missing.push("at least 1 barrier in Question 26");
-      if (form.barriers.indexOf(OTHER_LABEL) !== -1 && !form.otherBarrierText.trim()) missing.push("a description for “Other”");
+      if (form.barriers.indexOf(OTHER_LABEL) !== -1 && !form.otherBarrierText.trim()) missing.push("a description for “Other”"); OPEN_QUESTIONS.forEach(function(oq, oi){ if (oq.required && !form[oq.key].trim()) missing.push("Question " + (27 + oi)); });
       if (missing.length){
         errorBanner = '<div class="form-error">Please complete: ' + esc(missing.join(", ")) + '.</div>';
       }
@@ -550,7 +550,7 @@
       '</div>' +
       OPEN_QUESTIONS.map(function(oq, i){
         var n = 27 + i;
-        return '<div class="open-q"><label>'+n+'. '+esc(oq.label)+'</label>' +
+        return '<div class="open-q"><label>'+n+'. '+esc(oq.label)+(oq.required?' <span class="required-star">*</span>':'')+'</label>' +
           '<textarea data-open="'+oq.key+'" placeholder="Type your answer…">'+esc(form[oq.key])+'</textarea></div>';
       }).join('') +
     '</div>';
@@ -608,7 +608,7 @@
     if (!form.gradeLevel) return false;
     if (ratingsCompleteCount() < STATEMENTS.length) return false;
     if (form.barriers.length === 0) return false;
-    if (form.barriers.indexOf(OTHER_LABEL) !== -1 && !form.otherBarrierText.trim()) return false;
+    if (form.barriers.indexOf(OTHER_LABEL) !== -1 && !form.otherBarrierText.trim()) return false; for (var oi=0; oi<OPEN_QUESTIONS.length; oi++){ var oq=OPEN_QUESTIONS[oi]; if (oq.required && !form[oq.key].trim()) return false; }
     return true;
   }
 
