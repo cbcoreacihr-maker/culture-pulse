@@ -139,11 +139,11 @@
   @media (max-width:620px){ .barrier-grid{ grid-template-columns:1fr; } }
   .barrier-opt{ display:flex; align-items:flex-start; gap:10px; padding:9px 10px; border-radius:9px; border:1px solid transparent; cursor:pointer; }
   .barrier-opt:hover{ background:var(--surface-2); }
-  .barrier-opt input{ margin-top:3px; accent-color:var(--accent-2); width:16px; height:16px; flex:0 0 auto; }
+  .barrier-opt input[type=checkbox]{ margin-top:3px; accent-color:var(--accent-2); width:16px; height:16px; flex:0 0 auto; }
   .barrier-opt span{ font-size:13.5px; line-height:1.4; }
   .barrier-opt.disabled{ opacity:.4; cursor:not-allowed; }
   .other-row{ grid-column:1 / -1; }
-  .other-row input[type=text]{ margin-top:8px; }
+  .other-row input[type=text]{ margin-top:8px; width:100%; box-sizing:border-box; border:1px solid var(--line); background:var(--bg); color:var(--ink); border-radius:9px; padding:11px 12px; font-size:14.5px; font-family:inherit; }
 
   .open-q{ margin-bottom:24px; }
   .open-q:last-child{ margin-bottom:0; }
