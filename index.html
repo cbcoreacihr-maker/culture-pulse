@@ -685,6 +685,53 @@
     return Object.keys(groups).sort().map(function(k){ return { label:k, count:groups[k] }; });
   }
 
+  // Average Section A score per calendar month (YYYY-MM), oldest first —
+  // used to compare this wave/period against previous ones.
+  function scoreTrendByPeriod(rows){
+    var groups = {};
+    rows.forEach(function(r){
+      var period = (r.submittedAt||"").slice(0,7);
+      if (!period) return;
+      if (!groups[period]) groups[period] = { sum:0, n:0, count:0 };
+      groups[period].count++;
+      for (var i=1;i<=STATEMENTS.length;i++){
+        var v = r.ratings && r.ratings[i];
+        if (v){ groups[period].sum += v; groups[period].n++; }
+      }
+    });
+    return Object.keys(groups).sort().map(function(k){
+      var g = groups[k];
+      return { label:k, mean: g.n ? g.sum/g.n : 0, count: g.count };
+    });
+  }
+
+  function renderTrendPanel(title, hint, trend){
+    var html = '<div class="panel"><h3>'+esc(title)+'</h3><div class="phint">'+esc(hint)+'</div>';
+    if (trend.length === 0){
+      html += '<div class="empty-note" style="padding:6px 2px;">No timestamped responses yet.</div></div>';
+      return html;
+    }
+    if (trend.length === 1){
+      html += '<div class="empty-note" style="padding:6px 2px;">Only one period of data so far ('+esc(trend[0].label)+'). Trend comparison will appear once a later period has responses.</div></div>';
+      return html;
+    }
+    trend.forEach(function(p, i){
+      var pct = (p.mean/5*100).toFixed(1);
+      var delta = '';
+      if (i > 0){
+        var diff = p.mean - trend[i-1].mean;
+        var sign = diff > 0.005 ? '\u25b2' : diff < -0.005 ? '\u25bc' : '\u2248';
+        var color = diff > 0.005 ? 'var(--good)' : diff < -0.005 ? 'var(--critical)' : 'var(--muted)';
+        delta = ' <span class="mono" style="color:'+color+';font-size:11px">'+sign+' '+(diff>=0?'+':'')+diff.toFixed(2)+' vs prev</span>';
+      }
+      html += '<div class="bar-row"><div><div class="blabel">'+esc(p.label)+' <span class="mono" style="color:var(--muted);font-size:11px">('+p.count+' resp.)</span>'+delta+'</div>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+scoreColor(p.mean)+'"></div></div></div>' +
+        '<div class="bar-val mono">'+p.mean.toFixed(2)+'</div></div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
   function renderGroupPanel(title, hint, stats){
     var html = '<div class="panel"><h3>'+esc(title)+'</h3><div class="phint">'+esc(hint)+'</div>';
     if (stats.length === 0){
@@ -1046,6 +1093,12 @@
     html += '</div></div>';
 
     html += '</div>'; // end second panel-grid
+
+    // Score trend over time (month-over-month)
+    var trend = scoreTrendByPeriod(rows);
+    html += '<div class="panel-grid" style="grid-template-columns:1fr">' +
+      renderTrendPanel("Culture score trend (month over month)", "Average Section A score by calendar month, oldest first, with change vs the previous month.", trend) +
+    '</div>';
 
     // Participation rate (needs a manually entered headcount, kept in this browser only)
     var hc = getHeadcount();
