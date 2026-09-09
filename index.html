@@ -321,6 +321,19 @@
   var SCALE = ["Strongly Disagree","Disagree","Neutral","Agree","Strongly Agree"];
   var MAX_BARRIERS = 3;
   var STORAGE_KEY = "culturePulse.submittedId.v1";
+  var COOKIE_KEY = "cp_submitted_v1";
+  function setCookie(name, value, days){
+    try{
+      var maxAge = days < 0 ? 0 : days*24*60*60;
+      document.cookie = name + "=" + encodeURIComponent(value) + ";max-age=" + maxAge + ";path=/;SameSite=Lax";
+    }catch(e){}
+  }
+  function getCookie(name){
+    try{
+      var m = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+      return m ? decodeURIComponent(m[1]) : null;
+    }catch(e){ return null; }
+  }
 
   // ---------------------------------------------------------------
   // Backend: Google Apps Script Web App (see SETUP instructions)
@@ -411,7 +424,9 @@
           '<button class="btn btn-ghost" id="btn-again">Submit another response</button>' +
         '</div>';
       el("btn-again").addEventListener("click", function(){
+        if (!confirm("This lets you submit another response from this same device. Only continue if you're completing this on behalf of a different person (e.g. a shared kiosk or laptop) \u2014 multiple responses from one device are visible to HR for data-quality review.")) return;
         try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+        setCookie(COOKIE_KEY, "", -1);
         submitted = false;
         form = { businessFunction:"", gradeLevel:"", ratings:{}, barriers:[], otherBarrierText:"",
           biggestObstacle:"", managerAction:"", processToSimplify:"", toolsNeeded:"" };
@@ -615,6 +630,7 @@
         throw new Error(json && json.error || "unknown");
       }
       try{ localStorage.setItem(STORAGE_KEY, "1"); }catch(e){}
+      setCookie(COOKIE_KEY, "1", 3650);
       submitting = false; submitted = true; showErrors = false;
       renderSurvey();
       window.scrollTo({top:0, behavior:"smooth"});
@@ -1352,7 +1368,7 @@
   // Init
   // ---------------------------------------------------------------
   try{
-    if (localStorage.getItem(STORAGE_KEY)) submitted = true;
+    if (localStorage.getItem(STORAGE_KEY) || getCookie(COOKIE_KEY)) submitted = true;
     storedHrCode = localStorage.getItem(HR_CODE_KEY);
   }catch(e){}
 
