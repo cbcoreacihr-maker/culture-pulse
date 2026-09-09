@@ -700,6 +700,58 @@
     return html;
   }
 
+  // Cross-tabulates two group fields (e.g. Business/Function x Job Grade)
+  // into a matrix of {mean, count} cells for the heatmap view.
+  function crossTabStats(rows, field1, field2){
+    var rowKeys = [], colKeys = [];
+    var cells = {};
+    rows.forEach(function(r){
+      var rk = (r[field1]||"").trim() || "Unspecified";
+      var ck = (r[field2]||"").trim() || "Unspecified";
+      if (rowKeys.indexOf(rk) === -1) rowKeys.push(rk);
+      if (colKeys.indexOf(ck) === -1) colKeys.push(ck);
+      var key = rk + "|||" + ck;
+      if (!cells[key]) cells[key] = { sum:0, n:0, count:0 };
+      cells[key].count++;
+      for (var i=1;i<=STATEMENTS.length;i++){
+        var v = r.ratings && r.ratings[i];
+        if (v){ cells[key].sum += v; cells[key].n++; }
+      }
+    });
+    rowKeys.sort(); colKeys.sort();
+    var matrix = rowKeys.map(function(rk){
+      return colKeys.map(function(ck){
+        var c = cells[rk+"|||"+ck];
+        return c ? { mean: c.n ? c.sum/c.n : 0, count: c.count } : { mean: 0, count: 0 };
+      });
+    });
+    return { rowKeys: rowKeys, colKeys: colKeys, matrix: matrix };
+  }
+
+  function renderHeatmap(title, hint, ct){
+    var html = '<div class="panel"><h3>'+esc(title)+'</h3><div class="phint">'+esc(hint)+'</div>';
+    if (ct.rowKeys.length === 0 || ct.colKeys.length === 0){
+      html += '<div class="empty-note" style="padding:6px 2px;">No data yet.</div></div>';
+      return html;
+    }
+    html += '<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:12px">';
+    html += '<tr><th style="padding:6px 8px;text-align:left;border:1px solid var(--line)"></th>' +
+      ct.colKeys.map(function(ck){ return '<th style="padding:6px 8px;text-align:center;border:1px solid var(--line);white-space:nowrap">'+esc(ck)+'</th>'; }).join('') + '</tr>';
+    ct.matrix.forEach(function(row, ri){
+      html += '<tr><td style="padding:6px 8px;border:1px solid var(--line);font-weight:600;white-space:nowrap">'+esc(ct.rowKeys[ri])+'</td>';
+      row.forEach(function(cell){
+        if (cell.count === 0){
+          html += '<td style="padding:6px 8px;border:1px solid var(--line);text-align:center;color:var(--muted)">—</td>';
+        } else {
+          html += '<td style="padding:6px 8px;border:1px solid var(--line);text-align:center;background:'+scoreColor(cell.mean)+';color:#fff">'+cell.mean.toFixed(2)+'<div style="font-size:10px;opacity:.85">n='+cell.count+'</div></td>';
+        }
+      });
+      html += '</tr>';
+    });
+    html += '</table></div></div>';
+    return html;
+  }
+
   // Most frequently selected Section B barrier within each group value.
   function topBarrierByGroup(rows, field){
     var groups = {};
@@ -961,6 +1013,12 @@
     html += '<div class="panel-grid">' +
       '<div>' + renderGroupPanel("Business / Function — culture score comparison", "Average Section A score and response count by Business/Function.", byFunction) + '</div>' +
       '<div>' + renderGroupPanel("Job Grade — culture score comparison", "Average Section A score and response count by Job Grade.", byGrade) + '</div>' +
+    '</div>';
+
+    // Business/Function x Job Grade score heatmap
+    var crossTab = crossTabStats(rows, "businessFunction", "gradeLevel");
+    html += '<div class="panel-grid" style="grid-template-columns:1fr">' +
+      renderHeatmap("Business/Function x Job Grade — score heatmap", "Average Section A score for each combination. Darker red = weaker culture score.", crossTab) +
     '</div>';
 
     // Rating distribution + response trend over time
