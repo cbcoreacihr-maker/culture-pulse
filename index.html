@@ -335,6 +335,20 @@
     }catch(e){ return null; }
   }
 
+  var DEVICE_ID_KEY = "culturePulse.deviceId.v1";
+  function getDeviceId(){
+    try{
+      var id = localStorage.getItem(DEVICE_ID_KEY);
+      if (!id){
+        id = "d_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+        localStorage.setItem(DEVICE_ID_KEY, id);
+      }
+      return id;
+    }catch(e){
+      return "";
+    }
+  }
+
   // ---------------------------------------------------------------
   // Backend: Google Apps Script Web App (see SETUP instructions)
   // ---------------------------------------------------------------
@@ -610,6 +624,7 @@
 
     var payload = {
       action: "submit",
+      deviceId: getDeviceId(),
       businessFunction: form.businessFunction.trim(),
       gradeLevel: form.gradeLevel.trim(),
       ratings: Object.assign({}, form.ratings),
@@ -637,7 +652,7 @@
     }).catch(function(err){
       submitting = false;
       renderSurvey();
-      var reason = (err && err.message === "closed") ? "The survey is currently closed." : "We couldn't submit your response. Please check your connection and try again.";
+      var reason = (err && err.message === "closed") ? "The survey is currently closed." : (err && err.message === "duplicate") ? "A response from this device has already been recorded. If you\u2019re completing this for someone else, use \u201cSubmit another response\u201d." : "We couldn't submit your response. Please check your connection and try again.";
       alert(reason);
     });
   }
