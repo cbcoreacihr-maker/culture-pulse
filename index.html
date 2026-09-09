@@ -748,6 +748,105 @@
     return html;
   }
 
+  // Rule-based "what should HR do next" engine. No external AI call is made —
+  // this maps the weakest Section A statements and most-selected barriers to a
+  // pre-written HR action, so it works offline with no API key or cost.
+  var STATEMENT_ACTIONS = {
+    1: "Run goal-cascade sessions so every team can trace its KPIs back to top-level strategy.",
+    2: "Include values-based behavior in leadership performance reviews and 360 feedback.",
+    3: "Audit the KPI-setting process and give managers a SMART-goal template.",
+    4: "Introduce quarterly or monthly check-ins alongside the annual review cycle.",
+    5: "Launch a structured recognition program (spot awards, peer recognition) with visible criteria.",
+    6: "Train managers on timely, fair performance-improvement conversations.",
+    7: "Roll out a manager coaching workshop and add coaching frequency to manager scorecards.",
+    8: "Review the delegation-of-authority matrix and push routine decisions down a level.",
+    9: "Make barrier removal an explicit expectation in the manager competency framework.",
+    10: "Map current decision rights and set time-bound SLAs for common approvals.",
+    11: "Run a process-simplification audit on the slowest approval workflows.",
+    12: "Set up a lightweight change-communication protocol for priority shifts.",
+    13: "Expand the L&D calendar based on the skills gaps this survey shows by function/grade.",
+    14: "Add individual development plan (IDP) discussions to managers' quarterly checklist.",
+    15: "Launch a suggestion scheme or continuous-improvement channel with visible follow-through.",
+    16: "Set an SLA (e.g. 2 weeks) for reviewing and responding to employee suggestions.",
+    17: "Bring customer feedback data into quarterly business review agendas.",
+    18: "Introduce cross-functional projects or OKRs with shared success metrics.",
+    19: "Strengthen psychological safety via skip-level meetings and anonymous feedback channels.",
+    20: "Reinforce the anti-favoritism policy and review reward/promotion decisions for consistency.",
+    21: "Audit access to stretch assignments and training across grades/functions for equity gaps.",
+    22: "Run a workload/capacity review in the most affected Business/Function or Grade.",
+    23: "Review resourcing levels against workload in the weakest-scoring teams.",
+    24: "Reinforce leadership accountability through 360 feedback and visible role-modeling.",
+    25: "Prioritize IT/tooling investment based on the tool-gap feedback in this survey."
+  };
+  var BARRIER_ACTIONS = {
+    "Unclear goals or priorities": "Run goal-cascade workshops and publish quarterly priorities to all teams.",
+    "Too many approval levels": "Simplify the approval matrix and raise delegated authority limits.",
+    "Slow decision-making": "Set decision SLAs and clarify decision owners with a RACI.",
+    "Lack of authority / empowerment": "Push routine decision rights down a level; review the DOA matrix.",
+    "Insufficient manager coaching": "Launch a manager coaching-skills training program.",
+    "Lack of timely feedback": "Set a regular 1:1 cadence with clear feedback expectations.",
+    "Poor cross-functional collaboration": "Set up cross-functional working groups with shared OKRs.",
+    "Insufficient manpower / resources": "Review headcount/workload in the affected teams.",
+    "Inadequate tools / technology": "Prioritize IT/tooling investment based on the reported gaps.",
+    "Lack of timely data / information": "Improve reporting access and dashboard turnaround time.",
+    "Too many manual or repetitive processes": "Start a targeted process-automation/digitization initiative.",
+    "Excessive workload": "Run a workload rebalancing and capacity-planning exercise.",
+    "Too many meetings / administrative activities": "Audit recurring meetings and cancel or shorten low-value ones.",
+    "Lack of skills / training": "Target L&D spend using this survey's skills-gap data.",
+    "Weak recognition of good performance": "Launch a structured, visible recognition program.",
+    "Underperformance not addressed": "Train managers on timely, consistent performance management.",
+    "Fear of making mistakes": "Introduce psychological-safety practices such as blameless post-mortems.",
+    "Fear of speaking up": "Add anonymous feedback channels and regular skip-level meetings.",
+    "Workplace politics / favoritism": "Run a fairness audit and publish transparent promotion criteria.",
+    "Frequent changes in priorities": "Stabilize the planning cadence and set a change-communication protocol."
+  };
+
+  function suggestActions(rows){
+    var qMeans = STATEMENTS.map(function(text, idx){
+      var n = idx+1, sum=0, count=0;
+      rows.forEach(function(r){ var v = r.ratings && r.ratings[n]; if (v){ sum+=v; count++; } });
+      return { n:n, text:text, mean: count? sum/count : 0, count: count };
+    }).filter(function(m){ return m.count>0; });
+    var weakest = qMeans.slice().sort(function(a,b){ return a.mean-b.mean; }).slice(0,3);
+
+    var barrierCount = {};
+    BARRIERS.forEach(function(b){ barrierCount[b]=0; });
+    rows.forEach(function(r){ (r.barriers||[]).forEach(function(b){ if (barrierCount.hasOwnProperty(b)) barrierCount[b] = (barrierCount[b]||0)+1; }); });
+    var topBarriers = Object.keys(barrierCount).map(function(b){ return { label:b, count:barrierCount[b] }; })
+      .filter(function(x){ return x.count>0; }).sort(function(a,b){ return b.count-a.count; }).slice(0,3);
+
+    var actions = [];
+    weakest.forEach(function(m){
+      if (STATEMENT_ACTIONS[m.n]){
+        actions.push({ type:"statement", issue: m.text, evidence: m.mean.toFixed(2)+" / 5 average", action: STATEMENT_ACTIONS[m.n] });
+      }
+    });
+    topBarriers.forEach(function(b){
+      if (BARRIER_ACTIONS[b.label]){
+        actions.push({ type:"barrier", issue: b.label, evidence: b.count+" respondent"+(b.count===1?"":"s")+" selected this barrier", action: BARRIER_ACTIONS[b.label] });
+      }
+    });
+    return actions;
+  }
+
+  function renderActionPanel(actions){
+    var html = '<div class="panel"><h3>Recommended next actions</h3>' +
+      '<div class="phint">Rule-based suggestions from the weakest statements and most-selected barriers above — not AI-generated, always reviewed by HR before rollout.</div>';
+    if (actions.length === 0){
+      html += '<div class="empty-note" style="padding:6px 2px;">Not enough data yet to generate recommendations.</div></div>';
+      return html;
+    }
+    actions.forEach(function(a, i){
+      html += '<div style="padding:10px 0;border-top:'+(i===0?'none':'1px solid var(--line)')+'">' +
+        '<div style="font-weight:600;font-size:13px">'+(i+1)+'. '+esc(a.issue)+'</div>' +
+        '<div class="mono" style="color:var(--muted);font-size:11px;margin:2px 0 6px">'+esc(a.evidence)+'</div>' +
+        '<div style="font-size:13px">'+esc(a.action)+'</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
   function renderGroupPanel(title, hint, stats){
     var html = '<div class="panel"><h3>'+esc(title)+'</h3><div class="phint">'+esc(hint)+'</div>';
     if (stats.length === 0){
@@ -1018,6 +1117,10 @@
       '<div class="tile"><div class="tlabel">Weakest statement</div><div class="tvalue" style="font-size:14.5px;line-height:1.35">'+(sortedAsc[0]?esc(sortedAsc[0].text):'—')+'</div><div class="tnote mono">'+(sortedAsc[0]?sortedAsc[0].mean.toFixed(2)+' / 5':'')+'</div></div>' +
       '<div class="tile"><div class="tlabel">Top barrier</div><div class="tvalue" style="font-size:15px;line-height:1.35">'+esc(topBarrier)+'</div><div class="tnote">'+(barrierSorted[0]? Math.round(barrierSorted[0].count/total*100)+'% of respondents' : '')+'</div></div>' +
     '</div>';
+
+    // Rule-based recommended next actions
+    var recommendedActions = suggestActions(rows);
+    html += '<div class="panel-grid" style="grid-template-columns:1fr">' + renderActionPanel(recommendedActions) + '</div>';
 
     html += '<div class="panel-grid"><div>';
 
